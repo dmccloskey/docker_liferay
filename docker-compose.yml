@@ -1,7 +1,8 @@
 version: '2'
 services:
   portal:
-    build: .
+    #build: .
+    image: dmccloskey/docker_openbis
     depends_on:
      - postgres
     ports:

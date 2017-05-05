@@ -2,8 +2,7 @@
 ##Based on mdelapenya/liferay-portal:7-ce-ga3-tomcat-hsql
 ##Customized Java installation
 
-#FROM debian:jessie
-FROM postgres:latest
+FROM debian:jessie
 
 ##Java installation
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
@@ -22,7 +21,8 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 RUN apt-get update \
   && apt-get install -y curl \
   zip \
-  #git \ QBIC installation 
+  #required for QBIC installation
+  git \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && useradd -ms /bin/bash liferay
@@ -44,13 +44,6 @@ RUN set -x \
 			&& unzip liferay-ce-portal-tomcat-7.0-ga3-20160804222206210.zip \
 			&& rm liferay-ce-portal-tomcat-7.0-ga3-20160804222206210.zip
 
-RUN chown -R liferay:liferay $LIFERAY_HOME
-
-EXPOSE 8080/tcp
-EXPOSE 11311/tcp
-
-USER liferay
-
 ##postgresql configurations
 COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
 
@@ -59,13 +52,22 @@ COPY ./configs/qbic-ext.properties $LIFERAY_HOME/qbic-ext.properties
 COPY ./configs/labeling.methods $LIFERAY_HOME/labeling.methods
 
 # qnavigator portlet
+WORKDIR /home/liferay
 RUN git clone https://github.com/qbicsoftware/qnavigator qnavigator \
-    && cd qnavigator \
-    && jar cvf qnavigator.war \
+    && cd qnavigator/QBiCMainPortlet/WebContent \
+    && jar cvf qnavigator.war . \
     && mkdir -p $LIFERAY_HOME/deploy \
     && mv qnavigator.war $LIFERAY_HOME/deploy/
 
 # barcode generator
 # workflow portlet
+
+##Set permissions for liferay
+RUN chown -R liferay:liferay $LIFERAY_HOME
+
+EXPOSE 8080/tcp
+EXPOSE 11311/tcp
+
+USER liferay
 
 ENTRYPOINT ["catalina.sh", "run"]
