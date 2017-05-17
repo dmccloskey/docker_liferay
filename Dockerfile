@@ -49,6 +49,7 @@ COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
 
 ##QBIC customizations
 COPY ./configs/qbic-ext.properties $LIFERAY_HOME/qbic-ext.properties
+COPY ./configs/portlet.properties $LIFERAY_HOME/portlet.properties
 COPY ./configs/labeling.methods $LIFERAY_HOME/labeling.methods
 
 # qnavigator portlet
